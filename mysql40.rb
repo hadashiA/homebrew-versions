@@ -21,6 +21,15 @@ class Mysql40 < Formula
   conflicts_with 'mysql-cluster',
     :because => "mysql and mysql-cluster install the same binaries."
 
+  fails_with :clang do
+    build 425
+    cause <<-EOS.undent
+      /usr/include/sys/socket.h:610:5: note: candidate function not viable: no known conversion from 'size_socket *' (aka 'int *') to 'socklen_t *' (aka 'unsigned int *') for 3rd argument
+int   accept(int, struct sockaddr * __restrict, socklen_t * __restrict)
+        ^
+    EOS
+  end
+
   def install
     # Make sure the var/mysql directory exists
     (var+"mysql").mkpath
