@@ -3,9 +3,8 @@ require 'formula'
 class Mysql41 < Formula
   homepage 'http://download.softagency.net/MySQL/Downloads/MySQL-4.1/'
   url 'http://download.softagency.net/MySQL/Downloads/MySQL-4.1/mysql-4.1.22.tar.gz'
-  version '4.1.22'
 
-  md5 '37b4479951fa0cf052269d27c41ca200'
+  sha1 '857e942cc3207caf56e2aa48961fc1ed66d932e6'
 
   depends_on 'readline'
 
@@ -34,24 +33,28 @@ int   accept(int, struct sockaddr * __restrict, socklen_t * __restrict)
     # Make sure the var/mysql directory exists
     (var+"mysql").mkpath
 
-    system "./configure", "--prefix=#{prefix}",
-    "--with-charset=utf8", "--with-collation=utf8_general_ci",
-    "--sysconfdir=#{etc}", "--datadir=#{var}", "--localstatedir=#{var}/mysql",
-    "--mandir=#{man}", "--infodir=#{info}",
-    "--without-readline", "--without-libedit"
+    system "./configure",
+      "--prefix=#{prefix}",
+      "--with-charset=utf8",
+      "--with-collation=utf8_general_ci",
+      "--sysconfdir=#{etc}",
+      "--datadir=#{var}",
+      "--localstatedir=#{var}/mysql",
+      "--mandir=#{man}",
+      "--infodir=#{info}",
+      "--without-readline",
+      "--without-libedit"
     system "make"
     system "make install"
-    # ln_s prefix+'scripts/mysql_install_db', bin+'mysql_install_db'
 
-    system "cp -r ./support-files #{prefix}/support-files"
-    system "chmod +x #{prefix}/support-files/mysql.server"
-    ln_s "#{prefix}/support-files/mysql.server", bin
+    share.install Dir['support-files']
+    bin.install "#{share}/support-files/mysql.server"
   end
 
   def caveats; <<-EOS.undent
     Set up databases to run AS YOUR USER ACCOUNT with:
         unset TMPDIR
-        mysql_install_db --verbose --user=`whoami` --basedir="$(brew --prefix mysql41)" --datadir=#{var}/mysql --tmpdir=/tmp
+        mysql_install_db --verbose --user=`whoami` --basedir="/usr/local/opt/mysql41" --datadir=#{var}/mysql --tmpdir=/tmp
 
     To set up base tables in another folder, or use a different user to run
     mysqld, view the help for mysqld_install_db:

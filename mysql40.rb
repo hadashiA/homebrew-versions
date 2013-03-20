@@ -3,8 +3,6 @@ require 'formula'
 class Mysql40 < Formula
   homepage 'http://mirror.provenscaling.com/mysql/community/source/4.0/'
   url 'http://mirror.provenscaling.com/mysql/community/source/4.0/mysql-4.0.25.tar.gz'
-  version '4.0.25'
-
   sha1 '65315c7659c75fcc9f3d9f749dbed26581f6da9c'
 
   depends_on 'readline'
@@ -30,26 +28,28 @@ int   accept(int, struct sockaddr * __restrict, socklen_t * __restrict)
     EOS
   end
 
+  def patches
+    DATA
+  end
+
   def install
     # Make sure the var/mysql directory exists
     (var+"mysql").mkpath
 
-    system "./configure", "--prefix=#{prefix}",
-    "--with-charset=ujis", 
-    "--sysconfdir=#{etc}", "--datadir=#{var}", "--localstatedir=#{var}/mysql",
-    "--mandir=#{man}", "--infodir=#{info}",
-    "--without-readline"
+    system "./configure",
+      "--prefix=#{prefix}",
+      "--with-charset=ujis", 
+      "--sysconfdir=#{etc}",
+      "--datadir=#{var}",
+      "--localstatedir=#{var}/mysql",
+      "--mandir=#{man}",
+      "--infodir=#{info}",
+      "--without-readline"
     system "make"
     system "make install"
-    # ln_s prefix+'scripts/mysql_install_db', bin+'mysql_install_db'
 
-    system "cp -r ./support-files #{prefix}/support-files"
-    system "chmod +x #{prefix}/support-files/mysql.server"
-    ln_s "#{prefix}/support-files/mysql.server", bin
-  end
-
-  def patches
-    DATA
+    share.install Dir['support-files']
+    bin.install "#{share}/support-files/mysql.server"
   end
 
   def caveats; <<-EOS.undent
