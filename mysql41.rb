@@ -3,13 +3,9 @@ require 'formula'
 class Mysql41 < Formula
   homepage 'http://download.softagency.net/MySQL/Downloads/MySQL-4.1/'
   url 'http://download.softagency.net/MySQL/Downloads/MySQL-4.1/mysql-4.1.22.tar.gz'
-
   sha1 '857e942cc3207caf56e2aa48961fc1ed66d932e6'
 
   depends_on 'readline'
-
-  conflicts_with 'mysql',
-    :because => "install the same binaries."
 
   conflicts_with 'mariadb',
     :because => "mysql and mariadb install the same binaries."
@@ -47,8 +43,12 @@ int   accept(int, struct sockaddr * __restrict, socklen_t * __restrict)
     system "make"
     system "make install"
 
-    share.install Dir['support-files']
-    bin.install "#{share}/support-files/mysql.server"
+    prefix.install Dir['support-files']
+    chmod 0755, "#{prefix}/support-files/mysql.server"
+    inreplace "#{prefix}/support-files/mysql.server" do |s|
+      s.gsub!(/^(PATH="?.*)("?)/, "\\1:#{HOMEBREW_PREFIX}/bin\\2")
+    end
+    ln_s "#{prefix}/support-files/mysql.server", bin
   end
 
   def caveats; <<-EOS.undent

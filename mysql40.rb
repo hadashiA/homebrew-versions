@@ -7,9 +7,6 @@ class Mysql40 < Formula
 
   depends_on 'readline'
 
-  conflicts_with 'mysql',
-    :because => "install the same binaries."
-
   conflicts_with 'mariadb',
     :because => "mysql and mariadb install the same binaries."
 
@@ -48,8 +45,12 @@ int   accept(int, struct sockaddr * __restrict, socklen_t * __restrict)
     system "make"
     system "make install"
 
-    share.install Dir['support-files']
-    bin.install "#{share}/support-files/mysql.server"
+    prefix.install Dir['support-files']
+    chmod 0755, "#{prefix}/support-files/mysql.server"
+    inreplace "#{prefix}/support-files/mysql.server" do |s|
+      s.gsub!(/^(PATH="?.*)("?)/, "\\1:#{HOMEBREW_PREFIX}/bin\\2")
+    end
+    ln_s "#{prefix}/support-files/mysql.server", bin
   end
 
   def caveats; <<-EOS.undent
